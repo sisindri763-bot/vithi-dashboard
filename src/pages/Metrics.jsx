@@ -45,7 +45,7 @@ export default function Metrics() {
       ]);
       setMetricsData(m);
       setChartsData(c);
-      const pipes = p?.items || p?.pipelines || (Array.isArray(p) ? p : []);
+      const pipes = m?.items || p?.items || p?.pipelines || (Array.isArray(p) ? p : []);
       setPipelines(pipes);
     } catch (e) {
       console.error('Error loading live metrics data:', e);
@@ -59,33 +59,47 @@ export default function Metrics() {
   }, []);
 
   // Compute live runs & KPIs
-  const runs = metricsData?.runs || {};
-  const totalRuns = runs.total ?? 38;
-  const successfulRuns = runs.successful ?? 29;
-  const failedRuns = runs.failed ?? 9;
-  const successRate = runs.success_rate != null ? Number(runs.success_rate).toFixed(1) : '76.3';
-  const avgDuration = runs.average_duration_seconds != null ? `${runs.average_duration_seconds}s` : '12.6s';
+  const totalRuns = metricsData?.kpis?.find(k => k.id === 'runs')?.value ?? 38;
+  const failedRuns = metricsData?.kpis?.find(k => k.id === 'failed_runs')?.value ?? 9;
+  const successfulRuns = Math.max(0, totalRuns - failedRuns);
+  const successRate = metricsData?.kpis?.find(k => k.id === 'success_rate')?.value != null
+    ? Number(metricsData.kpis.find(k => k.id === 'success_rate').value).toFixed(1)
+    : '76.3';
+  const avgDuration = metricsData?.kpis?.find(k => k.id === 'avg_duration')?.display ?? '13s';
 
-  // Compute live success rate over time from backend charts
+  // Compute live success rate over time from backend series
   const successRateTimeSeries = useMemo(() => {
+    if (metricsData?.series?.success_rate_over_time?.length > 0) {
+      return metricsData.series.success_rate_over_time.map(s => ({
+        time: s.timestamp ? s.timestamp.substring(5) : '',
+        rate: s.success_rate_pct,
+        success: s.success_rate_pct >= 80 ? 1 : 0,
+        failed: s.success_rate_pct < 80 ? 1 : 0
+      }));
+    }
     if (!chartsData?.labels) return [];
     return chartsData.labels.map((label, idx) => ({
       time: label,
-      rate: chartsData.successRateOverTime?.[idx] ?? 100,
-      success: chartsData.runsOverTime?.success?.[idx] ?? 0,
-      failed: chartsData.runsOverTime?.failed?.[idx] ?? 0,
+      rate: chartsData.success_rate_over_time?.[idx] ?? 100,
+      success: chartsData.runs_over_time?.success?.[idx] ?? 0,
+      failed: chartsData.runs_over_time?.failed?.[idx] ?? 0,
     }));
-  }, [chartsData]);
+  }, [metricsData, chartsData]);
 
   // Compute Donut status breakdown
   const statusDonutData = useMemo(() => {
+    const runsByStatus = metricsData?.charts?.runs_by_status;
+    const succ = runsByStatus?.success ?? successfulRuns;
+    const fail = runsByStatus?.failed ?? failedRuns;
+    const tot = succ + fail || 1;
+
     return [
-      { name: 'Success', value: successfulRuns, color: '#10B981', pct: `${((successfulRuns / (totalRuns || 1)) * 100).toFixed(1)}%` },
-      { name: 'Failed', value: failedRuns, color: '#EF4444', pct: `${((failedRuns / (totalRuns || 1)) * 100).toFixed(1)}%` },
+      { name: 'Success', value: succ, color: '#10B981', pct: `${((succ / tot) * 100).toFixed(1)}%` },
+      { name: 'Failed', value: fail, color: '#EF4444', pct: `${((fail / tot) * 100).toFixed(1)}%` },
       { name: 'Running', value: 0, color: '#F59E0B', pct: '0%' },
       { name: 'Cancelled', value: 0, color: '#94A3B8', pct: '0%' },
     ];
-  }, [successfulRuns, failedRuns, totalRuns]);
+  }, [metricsData, successfulRuns, failedRuns]);
 
   // Duration distribution computed dynamically
   const durationDistribution = useMemo(() => {

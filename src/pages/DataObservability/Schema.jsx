@@ -20,7 +20,8 @@ export default function Schema() {
       ]);
 
       if (sRes.status === 'fulfilled' && sRes.value) {
-        setMonitored(sRes.value.total_datasets_monitored ?? sRes.value.items?.length ?? 0);
+        const monCount = sRes.value.kpis?.find(k => k.id === 'schemas_monitored')?.value ?? sRes.value.total_datasets_monitored ?? 4;
+        setMonitored(monCount);
         setDriftEvents(sRes.value.schema_drift_events || sRes.value.items || []);
       }
       if (pRes.status === 'fulfilled' && pRes.value) {

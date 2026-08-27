@@ -57,12 +57,13 @@ export default function Pipelines() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
 
-  const loadData = async () => {
+  const loadData = async (preset = headerDatePreset) => {
     setLoading(true);
     try {
+      const activePreset = typeof preset === 'string' ? preset : 'all';
       const [pRes, lRes] = await Promise.allSettled([
-        fetchPipelines(),
-        fetchLogs({ limit: 100 }),
+        fetchPipelines({ preset: activePreset }),
+        fetchLogs({ limit: 100, preset: activePreset }),
       ]);
 
       if (pRes.status === 'fulfilled' && pRes.value) {
@@ -71,8 +72,14 @@ export default function Pipelines() {
       }
 
       if (lRes.status === 'fulfilled' && lRes.value) {
-        const logs = lRes.value.logs || lRes.value.items || (Array.isArray(lRes.value) ? lRes.value : []);
-        setRuns(logs);
+        const rawLogs = lRes.value.logs || lRes.value.items || (Array.isArray(lRes.value) ? lRes.value : []);
+        const normalized = rawLogs.map(l => ({
+          ...l,
+          start_time: l.timestamp || l.start_time || l.last_run_at || l.created_at || '',
+          duration_seconds: Number(l.duration_seconds || (typeof l.duration === 'string' ? l.duration.replace('s', '') : l.duration)) || 0,
+          tool_name: l.tool || l.tool_name || l.source_tool || 'dbt',
+        }));
+        setRuns(normalized);
       }
     } catch (e) {
       console.error('Failed to load pipelines & runs:', e);
@@ -82,8 +89,8 @@ export default function Pipelines() {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    loadData(headerDatePreset);
+  }, [headerDatePreset]);
 
   // Distinct pipeline names for filter dropdown
   const distinctPipelineNames = useMemo(() => {

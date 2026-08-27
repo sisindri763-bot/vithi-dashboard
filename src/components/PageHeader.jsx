@@ -5,16 +5,16 @@ export default function PageHeader({ title, subtitle, onRefresh, onDateChange })
   const [env, setEnv] = useState('Production');
   const [refreshing, setRefreshing] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
-  const [selectedPreset, setSelectedPreset] = useState('30d');
+  const [selectedPreset, setSelectedPreset] = useState('all');
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
   const popoverRef = useRef(null);
 
   const presets = [
     { id: 'all', label: 'All Time' },
-    { id: '24h', label: 'Last 24 Hours' },
-    { id: '7d', label: 'Last 7 Days' },
     { id: '30d', label: 'Last 30 Days' },
+    { id: '7d', label: 'Last 7 Days' },
+    { id: '24h', label: 'Last 24 Hours' },
   ];
 
   // Close date picker when clicking outside
