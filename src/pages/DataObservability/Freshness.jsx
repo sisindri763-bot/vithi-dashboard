@@ -428,30 +428,30 @@ export default function Freshness() {
                                   <Database size={12} />
                                 </div>
                                 <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                                  {item.dataset_id || item.object_name || 'dataset'}
+                                  {item.pipeline_name || item.dataset_id || item.object_name || 'dataset'}
                                 </span>
                               </div>
                             </td>
                             <td>
                               <span style={{ color: 'var(--text-secondary)', fontSize: 12, fontWeight: 500 }}>
-                                {item.computedPipeline}
+                                {item.pipeline_name || item.computedPipeline}
                               </span>
                             </td>
                             <td>
                               <span className={`status-pill ${status}`}>
-                                {item.sla_status || item.status || item.freshness_status || 'Stale'}
+                                {item.status || item.sla_status || 'Stale'}
                               </span>
                             </td>
-                            <td style={{ fontSize: 12 }}>{fmtTime(item.last_updated_at || item.last_updated || item.last_run_time)}</td>
+                            <td style={{ fontSize: 12 }}>{item.last_updated_age || fmtTime(item.last_updated_at || item.last_updated)}</td>
                             <td style={{ fontSize: 12, fontWeight: 600, color: status === 'fresh' ? '#10B981' : status === 'delayed' ? '#F59E0B' : '#EF4444' }}>
-                              {fmtLag(item.lag_minutes)}
+                              {item.current_lag_display || (item.current_lag_hours ? `${Math.round(item.current_lag_hours)}h` : fmtLag(item.lag_minutes))}
                             </td>
                             <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                              {item.sla_minutes ? `< ${item.sla_minutes} mins` : (item.sla_target || '< 24 hours')}
+                              {item.sla_hours ? `< ${item.sla_hours} hrs` : (item.sla_minutes ? `< ${item.sla_minutes} mins` : '< 24 hrs')}
                             </td>
                             <td>
                               <span className="tool-badge">
-                                {item.system_name || item.engine || item.tool_name || 'snowflake'}
+                                {item.etl_tool || item.source_tool || item.engine || 'dbt'}
                               </span>
                             </td>
                           </tr>

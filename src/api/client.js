@@ -1,8 +1,13 @@
 import axios from 'axios';
 
 export const getBaseUrl = () => {
-  if (typeof window !== 'undefined' && localStorage.getItem('API_BASE_URL')) {
-    return localStorage.getItem('API_BASE_URL');
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('API_BASE_URL');
+    if (saved && !saved.includes('vithi-observability') && !saved.includes('mc-dashboard')) {
+      return saved;
+    }
+    // Clean up stale or legacy URL from localStorage
+    localStorage.setItem('API_BASE_URL', 'https://etl-pipeline-lemon.vercel.app');
   }
   return import.meta.env.VITE_API_BASE_URL || 'https://etl-pipeline-lemon.vercel.app';
 };
