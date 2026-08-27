@@ -42,7 +42,7 @@ npm run build
 | `VITE_API_BASE_URL` | VITHI FastAPI backend URL |
 
 ## API
-Connected to: `https://vithi-observability-dasboard.vercel.app`
+Connected to: `https://etl-pipeline-lemon.vercel.app`
 
 **Endpoints used:**
 - `GET /api/overview/kpis`
