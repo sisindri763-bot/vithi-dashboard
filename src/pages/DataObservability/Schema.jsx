@@ -132,8 +132,8 @@ export default function Schema() {
                           Stable (0 Drifts)
                         </span>
                       </td>
-                      <td style={{ fontSize: 12, color: '#10B981', fontWeight: 600 }}>
-                        &check; Schema Validated
+                      <td style={{ fontSize: 12, color: '#10B981', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <CheckCircle size={13} color="#10B981" /> Schema Validated
                       </td>
                     </tr>
                   ))}

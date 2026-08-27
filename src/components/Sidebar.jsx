@@ -21,7 +21,6 @@ const NAV_ITEMS = [
   },
   { icon: Network, label: 'Lineage', to: '/lineage' },
   { icon: AlertTriangle, label: 'Incidents', to: '/incidents' },
-  { icon: Shield, label: 'Data Quality', to: '/data-quality' },
   { icon: BarChart2, label: 'Metrics', to: '/metrics' },
   { icon: Bell, label: 'Alerts', to: '/alerts' },
   { icon: FileText, label: 'Logs', to: '/logs' },
